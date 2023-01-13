@@ -227,7 +227,7 @@ app.delete("/deleteCalendar/:calendarId", (req, res) => {
 
 });
 
-app.post("/createEvent", (req, res) => {
+app.post("/createEvent", authorizeUser, (req, res) => {
 
 
   async function createEvent(){
@@ -235,8 +235,8 @@ app.post("/createEvent", (req, res) => {
 
     let event = {
       name : name,
-      beginDate : beginDate,
-      endDate : endDate,
+      beginDate : new Date(beginDate),
+      endDate : new Date(endDate),
       description : description,
       calendarId: ObjectId(calendarId)
     }
@@ -254,7 +254,75 @@ app.post("/createEvent", (req, res) => {
   });
 
 
-})
+});
+
+
+app.get("/getNextEvents/:calendarId/:dateSince", authorizeUser, (req, res) => {
+
+
+  async function getNextEvents(){
+
+    let user = req.user;
+    let calendarId = req.params.calendarId;
+    let dateSince = new Date(req.params.dateSince);
+     
+  
+    let eventsCursor = await eventCollection.find({calendarId : ObjectId(calendarId), beginDate: { $gt: dateSince}}).limit(10);
+    let eventsFound = await eventsCursor.toArray();
+
+    console.log("this is the last events:");
+    console.log(eventsFound);
+
+
+
+    res.status(200).send({value : eventsFound});
+
+
+  
+  }
+
+  getNextEvents().catch(err=> {
+    console.log("cant get next events "+err);
+    res.status(500).send({value: "An error occurred while searching next events"});
+  });
+
+});
+
+
+app.get("/getEventsByDay/:calendarId/:dayDate", authorizeUser, (req, res) => {
+
+  async function getEventsByDay(){
+
+    const calendarId = req.params.calendarId;
+    let dayBegin = new Date(req.params.dayDate);
+    dayBegin.setHours(0, 0, 0, 0);
+
+    let dayEnd = newDate(req.params.dayDate);
+    dayEnd.setHours(23, 59, 59, 59);
+
+    let allEventsFound = [];
+
+    //find events who begins this day:
+    let eventsStartingThisDayFoundCursor = eventCollection.find({calendarId : ObjectId(calendarId), beginDate : {$gt: dayBegin, $lt : dayEnd}});
+    allEventsFound = allEventsFound.concat(eventsStartingThisDayFoundCursor.toArray());
+
+
+    //find events who end this day or covers this day
+
+    let eventsBetweenThisDay = eventCollection.find({calendarId : ObjectId(calendarId), beginDate : {$lt : dayBegin}, endDate: {$gt : dayEnd}});
+    allEventsFound = allEventsFound.concat(eventsBetweenThisDay.toArray());
+
+    res.status(200).send({ value : allEventsFound});
+
+
+  }
+
+  getEventsByDay().catch(err =>{
+    console.log("there was an error retrieving events by day: "+err);
+    res.status(500).send({value: "there was and error retrieving events"});
+  });
+
+});
 
 
 
