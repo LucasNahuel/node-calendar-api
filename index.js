@@ -1,4 +1,4 @@
-const { MongoClient, ObjectId, LEGAL_TCP_SOCKET_OPTIONS } = require('mongodb');
+const { MongoClient, ObjectId, LEGAL_TCP_SOCKET_OPTIONS, Int32 } = require('mongodb');
 const express = require('express');
 const cors = require('cors');
 const app = express();
@@ -264,7 +264,10 @@ app.get("/getNextEvents/:calendarId/:dateSince", authorizeUser, (req, res) => {
 
     let user = req.user;
     let calendarId = req.params.calendarId;
-    let dateSince = new Date(req.params.dateSince);
+    let dateSince = new Date(+req.params.dateSince);
+
+    console.log("this is the date from where to find next events");
+    console.log(dateSince);
      
   
     let eventsCursor = await eventCollection.find({calendarId : ObjectId(calendarId), beginDate: { $gt: dateSince}}).limit(10);
@@ -294,10 +297,10 @@ app.get("/getEventsByDay/:calendarId/:dayDate", authorizeUser, (req, res) => {
   async function getEventsByDay(){
 
     const calendarId = req.params.calendarId;
-    let dayBegin = new Date(req.params.dayDate);
+    let dayBegin = new Date(+req.params.dayDate);
     dayBegin.setHours(0, 0, 0, 0);
 
-    let dayEnd = newDate(req.params.dayDate);
+    let dayEnd = newDate(+req.params.dayDate);
     dayEnd.setHours(23, 59, 59, 59);
 
     let allEventsFound = [];
