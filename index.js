@@ -300,20 +300,23 @@ app.get("/getEventsByDay/:calendarId/:dayDate", authorizeUser, (req, res) => {
     let dayBegin = new Date(+req.params.dayDate);
     dayBegin.setHours(0, 0, 0, 0);
 
-    let dayEnd = newDate(+req.params.dayDate);
+    let dayEnd = new Date(+req.params.dayDate);
     dayEnd.setHours(23, 59, 59, 59);
+
+
+    
 
     let allEventsFound = [];
 
     //find events who begins this day:
     let eventsStartingThisDayFoundCursor = eventCollection.find({calendarId : ObjectId(calendarId), beginDate : {$gt: dayBegin, $lt : dayEnd}});
-    allEventsFound = allEventsFound.concat(eventsStartingThisDayFoundCursor.toArray());
+    allEventsFound = allEventsFound.concat(await eventsStartingThisDayFoundCursor.toArray());
 
 
     //find events who end this day or covers this day
 
-    let eventsBetweenThisDay = eventCollection.find({calendarId : ObjectId(calendarId), beginDate : {$lt : dayBegin}, endDate: {$gt : dayEnd}});
-    allEventsFound = allEventsFound.concat(eventsBetweenThisDay.toArray());
+    let eventsBetweenThisDay = eventCollection.find({calendarId : ObjectId(calendarId), beginDate : {$lt : dayBegin}, endDate: {$gt : dayBegin}});
+    allEventsFound = allEventsFound.concat(await eventsBetweenThisDay.toArray());
 
     res.status(200).send({ value : allEventsFound});
 
@@ -327,5 +330,31 @@ app.get("/getEventsByDay/:calendarId/:dayDate", authorizeUser, (req, res) => {
 
 });
 
+
+app.post("/editEvent", authorizeUser, (req,res) => {
+
+  async function editEvent(){
+
+    let event = {
+      name : req.body.name,
+      description : req.body.description,
+      beginDate : new Date(req.body.beginDate),
+      endDate : new Date(req.body.endDate),
+      calendarId : ObjectId(req.body.calendarId)
+    }
+
+    let update = await eventCollection.updateOne({_id : ObjectId(req.body._id)}, { $set: event });
+
+    if (update.acknowledged == true){
+      res.status(200).send({'value' : 'Updated correctly'});
+    }
+
+  }
+
+  editEvent().catch((err)=>{
+    console.log("error editing event: "+err);
+    res.status(500).send({'value': 'Something went wrong updating event'});
+  })
+});
 
 
