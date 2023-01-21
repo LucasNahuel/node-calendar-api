@@ -265,6 +265,7 @@ app.get("/getNextEvents/:calendarId/:dateSince", authorizeUser, (req, res) => {
     let user = req.user;
     let calendarId = req.params.calendarId;
     let dateSince = new Date(+req.params.dateSince);
+    dateSince.setHours(0, 0, 0, 0);
 
     console.log("this is the date from where to find next events");
     console.log(dateSince);
@@ -355,6 +356,26 @@ app.post("/editEvent", authorizeUser, (req,res) => {
     console.log("error editing event: "+err);
     res.status(500).send({'value': 'Something went wrong updating event'});
   })
+});
+
+
+app.delete("/eventDelete/:eventId", authorizeUser, (req,res) => {
+
+  async function eventDelete(){
+    const eventId = req.params.eventId;
+
+    let eventDelete = await eventCollection.deleteOne({_id : ObjectId(eventId)});
+
+    if(eventDelete && eventDelete.acknowledged === true){
+      res.status(200).send({message : "Deleted correctly"});
+    }
+  }
+
+  eventDelete().catch(err => {
+    console.log("there was an error deleting event"+ err);
+    res.status(500).send({'value': 'Something went wrong'});
+  })
+
 });
 
 
