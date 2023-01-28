@@ -319,6 +319,18 @@ app.get("/getEventsByDay/:calendarId/:dayDate", authorizeUser, (req, res) => {
     let eventsBetweenThisDay = eventCollection.find({calendarId : ObjectId(calendarId), beginDate : {$lt : dayBegin}, endDate: {$gt : dayBegin}});
     allEventsFound = allEventsFound.concat(await eventsBetweenThisDay.toArray());
 
+
+    allEventsFound = allEventsFound.sort((a, b) =>{
+      if(a.beginDate < b.beginDate){
+        return -1;
+      }
+      if(a.beginDate > b.beginDate){
+        return 1;
+      }
+
+      return 0
+    });
+
     res.status(200).send({ value : allEventsFound});
 
 
