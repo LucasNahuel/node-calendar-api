@@ -310,13 +310,13 @@ app.get("/getEventsByDay/:calendarId/:dayDate", authorizeUser, (req, res) => {
     let allEventsFound = [];
 
     //find events who begins this day:
-    let eventsStartingThisDayFoundCursor = eventCollection.find({calendarId : ObjectId(calendarId), beginDate : {$gt: dayBegin, $lt : dayEnd}});
+    let eventsStartingThisDayFoundCursor = eventCollection.find({calendarId : ObjectId(calendarId), beginDate : {$gte: dayBegin, $lte : dayEnd}});
     allEventsFound = allEventsFound.concat(await eventsStartingThisDayFoundCursor.toArray());
 
 
     //find events who end this day or covers this day
 
-    let eventsBetweenThisDay = eventCollection.find({calendarId : ObjectId(calendarId), beginDate : {$lt : dayBegin}, endDate: {$gt : dayBegin}});
+    let eventsBetweenThisDay = eventCollection.find({calendarId : ObjectId(calendarId), beginDate : {$lt : dayBegin}, endDate: {$gte : dayBegin}});
     allEventsFound = allEventsFound.concat(await eventsBetweenThisDay.toArray());
 
 
