@@ -316,7 +316,7 @@ app.get("/getEventsByDay/:calendarId/:dayDate", authorizeUser, (req, res) => {
 
     //find events who end this day or covers this day
 
-    let eventsBetweenThisDay = eventCollection.find({calendarId : ObjectId(calendarId), beginDate : {$lt : dayBegin}, endDate: {$gte : dayBegin}});
+    let eventsBetweenThisDay = eventCollection.find({calendarId : ObjectId(calendarId), beginDate : {$lt : dayBegin}, endDate: {$gt : dayBegin}});
     allEventsFound = allEventsFound.concat(await eventsBetweenThisDay.toArray());
 
 
