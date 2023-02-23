@@ -6,10 +6,14 @@ var bodyParser = require("body-parser");
 app.use(cors());
 app.use(bodyParser.json());
 const port = 4200;
+const dotenv = require('dotenv');
+dotenv.config();
+
+console.log(process.env.PASSWORD);
 
 //mongo connections properties
-const username = encodeURIComponent(process.env.USERNAME);
-const password = encodeURIComponent(process.env.PASSWORD);
+const username = process.env.USERNAME.toLowerCase();
+const password = process.env.PASSWORD;
 const clusterUrl = "cluster0.ypdud.mongodb.net";
 const authMechanism = "DEFAULT";
 const uri = `mongodb+srv://${username}:${password}@${clusterUrl}/?authMechanism=${authMechanism}`;
