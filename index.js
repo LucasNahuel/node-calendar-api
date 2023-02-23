@@ -8,8 +8,8 @@ app.use(bodyParser.json());
 const port = 4200;
 
 //mongo connections properties
-const username = encodeURIComponent("lucas");
-const password = encodeURIComponent("can_317");
+const username = encodeURIComponent(process.env.USERNAME);
+const password = encodeURIComponent(process.env.PASSWORD);
 const clusterUrl = "cluster0.ypdud.mongodb.net";
 const authMechanism = "DEFAULT";
 const uri = `mongodb+srv://${username}:${password}@${clusterUrl}/?authMechanism=${authMechanism}`;
