@@ -84,7 +84,7 @@ app.get('/usernameExists/:username', (req, res)=>{
     if(userFound != null){
       res.status(200).send({ value : true });
     }else{
-      res.status(200).send({value : false});
+      res.status(200).send({value : false}); 
     }
   }
 
@@ -109,7 +109,7 @@ app.get("/login/:username/:password", (req,res) =>{
     if(user != null){
       res.status(200).send({valid: true, username : user.username, password : user.password});
     }else{
-      res.status(200).send({valid : false});
+      res.status(401).send({valid : false});
     }
   
   }
