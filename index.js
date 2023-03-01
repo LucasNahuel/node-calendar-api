@@ -52,9 +52,19 @@ app.get('/', (req, res) => {
 
 app.post('/register', (req, res) =>{
 
-  async function register(){
+  
 
-    console.log(req.body);
+  register(req, res).catch(err =>{
+    console.log("error in /register : "+err);
+    res.status(500).send({value : "something went wrong"});
+  });
+});
+
+async function register(req,res){
+
+
+   
+
 
     const {username, password} = req.body;
 
@@ -62,19 +72,29 @@ app.post('/register', (req, res) =>{
 
     await userCollection.insertOne({username : username, password : password}).then(result =>{
       if(result != null){
-        res.status(200).send({value: "inserted correctly", username : username, password : password});
+
+        //create a default calendar for the user
+
+        let defaultCalendarReq = {
+          body : {
+            calendarName : "default",
+            description : "default calendar",
+            timezone : null
+          },
+          user : {
+            _id : result.insertedId
+          }
+        }
+
+
+        createCalendar(defaultCalendarReq, res);
+
       }else{
         res.status(400).send({value: "error saving user"});
       }
     });
 
   }
-
-  register().catch(err =>{
-    console.log("error in /register : "+err);
-    res.status(500).send({value : "something went wrong"});
-  });
-});
 
 app.get('/usernameExists/:username', (req, res)=>{
 
@@ -156,34 +176,36 @@ const authorizeUser = (req, res, next) => {
 
 app.post("/createCalendar", authorizeUser, (req, res)=>{
 
-  async function createCalendar(){
-    const {calendarName, description, timezone} = req.body;
-    const user = req.user;
+  
 
-    console.log("user in create");
-    console.log({user});
-
-    let calendar = {
-      userId : user._id,
-      calendarName : calendarName,
-      description : description,
-      timezone : timezone
-    }
-
-    let insertedCalendar = await calendarCollection.insertOne(calendar);
-
-    if(insertedCalendar){
-      res.status(200).send({value : "inserted correctly"});
-    }else{
-      res.status(400).send({value : "error inserting calendar"});
-    }
-  }
-
-  createCalendar().catch(err=>{
+  createCalendar(req,res).catch(err=>{
     console.log("error creating calendar "+err);
   });
 
 });
+
+async function createCalendar(req,res){
+  const {calendarName, description, timezone} = req.body;
+  const user = req.user;
+
+  console.log("user in create");
+  console.log({user});
+
+  let calendar = {
+    userId : user._id,
+    calendarName : calendarName,
+    description : description,
+    timezone : timezone
+  }
+
+  let insertedCalendar = await calendarCollection.insertOne(calendar);
+
+  if(insertedCalendar){
+    res.status(200).send({value : "inserted correctly"});
+  }else{
+    res.status(400).send({value : "error inserting calendar"});
+  }
+}
 
 app.get("/getCalendars", authorizeUser, (req, res)=>{
   
