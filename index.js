@@ -324,15 +324,19 @@ app.get("/getEventsByDay/:calendarId/:dayDate", authorizeUser, (req, res) => {
   async function getEventsByDay(){
 
     const calendarId = req.params.calendarId;
+
+    //define the date from the beginning of the given day
     let dayBegin = new Date(+req.params.dayDate);
     dayBegin.setHours(0, 0, 0, 0);
 
+
+    //define the date from the ending of the given day
     let dayEnd = new Date(+req.params.dayDate);
     dayEnd.setHours(23, 59, 59, 59);
 
 
     
-
+    //list to store the events found
     let allEventsFound = [];
 
     //find events who begins this day:
@@ -345,7 +349,7 @@ app.get("/getEventsByDay/:calendarId/:dayDate", authorizeUser, (req, res) => {
     let eventsBetweenThisDay = eventCollection.find({calendarId : ObjectId(calendarId), beginDate : {$lt : dayBegin}, endDate: {$gt : dayBegin}});
     allEventsFound = allEventsFound.concat(await eventsBetweenThisDay.toArray());
 
-
+    //sort events with custom compare function
     allEventsFound = allEventsFound.sort((a, b) =>{
       if(a.beginDate < b.beginDate){
         return -1;
